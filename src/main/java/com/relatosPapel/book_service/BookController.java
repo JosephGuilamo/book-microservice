@@ -17,33 +17,19 @@ public class BookController {
     @Autowired
     private BookService bookService;
 
+
     @PostMapping
     public ResponseEntity<Book> createBook(@RequestBody Book book) {
-        Book savedBook = bookService.saveBook(book);
+        Book savedBook = bookService.createBook(book);
         return new ResponseEntity<>(savedBook, HttpStatus.CREATED);
-    }
-
-    @GetMapping
-    public ResponseEntity<List<Book>> getAllBooks(
-            @RequestParam(required = false) String titulo,
-            @RequestParam(required = false) String autor,
-            @RequestParam(required = false) Double precio) {
-        List<Book> books = bookService.findAllBooks();
-        return new ResponseEntity<>(books, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Book> getBookById(@PathVariable Long id) {
-        Optional<Book> book = bookService.findBookById(id);
-        return book.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        Optional<Book> book = bookService.getBookById(id);
+        return book.map(ResponseEntity::ok).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<Book> updateBookPrice(@PathVariable Long id, @RequestBody Book bookDetails) {
-        Book updatedBook = bookService.updateBook(id, bookDetails);
-        return new ResponseEntity<>(updatedBook, HttpStatus.OK);
-    }
 
     @PutMapping("/{id}")
     public ResponseEntity<Book> updateBook(@PathVariable Long id, @RequestBody Book bookDetails) {
@@ -51,9 +37,31 @@ public class BookController {
         return new ResponseEntity<>(updatedBook, HttpStatus.OK);
     }
 
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Book> patchBook(@PathVariable Long id, @RequestBody Book bookDetails) {
+        Book updatedBook = bookService.patchBook(id, bookDetails);
+        return new ResponseEntity<>(updatedBook, HttpStatus.OK);
+    }
+
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteBook(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
         bookService.deleteBook(id);
-        return new ResponseEntity<>("Libro eliminado exitosamente", HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+
+    @GetMapping
+    public ResponseEntity<List<Book>> searchBooks(
+            @RequestParam(required = false) String titulo,
+            @RequestParam(required = false) String autor,
+            @RequestParam(required = false) String categoria,
+            @RequestParam(required = false) String isbn,
+            @RequestParam(required = false) Integer valoracion,
+            @RequestParam(required = false) Boolean visible) {
+
+        List<Book> books = bookService.searchBooks(titulo, autor, categoria, isbn, valoracion, visible);
+        return new ResponseEntity<>(books, HttpStatus.OK);
     }
 }
