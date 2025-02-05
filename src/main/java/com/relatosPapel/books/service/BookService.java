@@ -1,5 +1,7 @@
-package com.relatosPapel.book_service;
+package com.relatosPapel.books.service;
 
+import com.relatosPapel.books.domain.Book;
+import com.relatosPapel.books.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +23,6 @@ public class BookService {
     public List<Book> findAllBooks() {
         return bookRepository.findAll();
     }
-
 
     public Optional<Book> getBookById(Long id) {
         return bookRepository.findById(id);
@@ -64,18 +65,6 @@ public class BookService {
 
 
     public List<Book> searchBooks(String titulo, String autor, String categoria, String isbn, Integer valoracion, Boolean visible) {
-
-        if (titulo == null && autor == null && categoria == null && isbn == null && valoracion == null && visible == null) {
-            return bookRepository.findAll();
-        }
-
-
-        return bookRepository.findByTituloContainingAndAutorContainingAndCategoriaContainingAndIsbnContainingAndValoracionAndVisible(
-                titulo != null ? titulo : "",
-                autor != null ? autor : "",
-                categoria != null ? categoria : "",
-                isbn != null ? isbn : "",
-                valoracion,
-                visible);
+        return bookRepository.findByFilters(titulo, autor, categoria, isbn, valoracion, visible);
     }
 }

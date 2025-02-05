@@ -1,4 +1,4 @@
-package com.relatosPapel.book_service;
+package com.relatosPapel.books;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

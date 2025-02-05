@@ -1,7 +1,7 @@
-package com.relatosPapel.book_service;
+package com.relatosPapel.books.web.rest;
 
-import com.relatosPapel.book_service.Book;
-import com.relatosPapel.book_service.BookService;
+import com.relatosPapel.books.service.BookService;
+import com.relatosPapel.books.domain.Book;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
