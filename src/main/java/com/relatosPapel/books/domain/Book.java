@@ -2,47 +2,54 @@ package com.relatosPapel.books.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-
+@Document(indexName = "books", createIndex = true)
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
-@Table(name = "book")
+@ToString
 public class Book implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(name = "titulo")
-    private String titulo;
+    @Field(type = FieldType.Text, name = "title")
+    private String title;
 
-    @Column(name = "autor")
-    private String autor;
+    @Field(type = FieldType.Text,name = "author")
+    private String author;
 
-    @Column(name = "fecha_publicacion")
-    private LocalDate fechaPublicacion;
+    @Field(type = FieldType.Date, name = "releaseDate")
+    private LocalDate releaseDate;
 
-    @Column(name = "categoria")
-    private String categoria;
+    @Field(type = FieldType.Keyword,name = "genre")
+    private String genre;
 
-    @Column(name = "isbn")
+    @Field(type = FieldType.Text,name = "isbn")
     private String isbn;
 
-    @Column(name = "valoracion")
-    private Integer valoracion;
+    @Field(type = FieldType.Integer,name = "rating")
+    private Integer rating;
 
-    @Column(name = "visible")
+    @Field(type = FieldType.Boolean,name = "visible")
     private Boolean visible;
 
-    @Column(name = "precio")
-    private Double precio;
+    @Field(type = FieldType.Double,name = "price")
+    private Double price;
 
-    @Column(name = "image_url")
+    @Field(type = FieldType.Text,name = "image_url")
     private String imageUrl;
+
+    @Field(type = FieldType.Search_As_You_Type,name = "summary")
+    private String summary;
+
+    @Field(type = FieldType.Search_As_You_Type,name = "tags")
+    private String tags;
 
 }

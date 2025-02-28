@@ -1,47 +1,23 @@
 package com.relatosPapel.books.repository;
 
 import com.relatosPapel.books.domain.Book;
-import com.relatosPapel.books.repository.utils.Consts;
-import com.relatosPapel.books.repository.utils.SearchCriteria;
-import com.relatosPapel.books.repository.utils.SearchOperation;
-import com.relatosPapel.books.repository.utils.SearchStatement;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.ObjectUtils;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
-public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificationExecutor<Book> {
+public interface BookRepository extends ElasticsearchRepository<Book, Long> {
 
-   default List<Book> findByFilters(String titulo, String autor, String categoria, String isbn, Integer valoracion, Boolean visible){
-       SearchCriteria<Book> spec = new SearchCriteria<>();
+    List<Book> findByTitle(String title);
 
-       if (!ObjectUtils.isEmpty(titulo)) {
-           spec.add(new SearchStatement(Consts.TITULO, titulo, SearchOperation.MATCH));
-       }
+    Optional<Book> findById(String id);
 
-       if (!ObjectUtils.isEmpty(autor)) {
-           spec.add(new SearchStatement(Consts.AUTOR, autor, SearchOperation.MATCH));
-       }
+    Book save(Book book);
 
-       if (!ObjectUtils.isEmpty(categoria)) {
-           spec.add(new SearchStatement(Consts.CATEGORIA, categoria, SearchOperation.EQUAL));
-       }
+    void delete(Book book);
 
-       if (!ObjectUtils.isEmpty(isbn)) {
-           spec.add(new SearchStatement(Consts.ISBN, isbn, SearchOperation.MATCH));
-       }
+    List<Book> findAll();
 
-         if (!ObjectUtils.isEmpty(valoracion)) {
-              spec.add(new SearchStatement(Consts.VALORACION, valoracion, SearchOperation.EQUAL));
-         }
-
-       if (visible != null) {
-           spec.add(new SearchStatement(Consts.VISIBLE, visible, SearchOperation.EQUAL));
-       }
-
-       return findAll(spec);
-    }
 }

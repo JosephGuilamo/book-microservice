@@ -2,93 +2,80 @@ package com.relatosPapel.books.web.rest;
 
 import com.relatosPapel.books.service.BookService;
 import com.relatosPapel.books.domain.Book;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.relatosPapel.books.service.dto.BookDTO;
+import com.relatosPapel.books.service.dto.BooksQueryDTO;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @RestController
 @RequestMapping("/books")
 @Tag(name = "Book Controller", description = "API para gestionar libros")
 public class BookController {
 
-    @Autowired
-    private BookService bookService;
+    private final BookService bookService;
 
-    @Operation(summary = "Crear un nuevo libro", responses = {
-            @ApiResponse(responseCode = "201", description = "Libro creado correctamente",
-                    content = @Content(schema = @Schema(implementation = Book.class)))
-    })
-    @PostMapping
-    public ResponseEntity<Book> createBook(@RequestBody Book book) {
+    public BookController(BookService bookService) {
+        this.bookService = bookService;
+    }
+
+    @PostMapping()
+    public ResponseEntity<Book> createBook(@Valid @RequestBody BookDTO book) {
+        log.info("Request create book {}", book);
         Book savedBook = bookService.createBook(book);
-        return new ResponseEntity<>(savedBook, HttpStatus.CREATED);
+        return ResponseEntity.ok(savedBook);
     }
 
-    @Operation(summary = "Obtener un libro por ID", responses = {
-            @ApiResponse(responseCode = "200", description = "Libro encontrado",
-                    content = @Content(schema = @Schema(implementation = Book.class))),
-            @ApiResponse(responseCode = "404", description = "Libro no encontrado")
-    })
+
     @GetMapping("/{id}")
-    public ResponseEntity<Book> getBookById(@Parameter(description = "ID del libro a buscar") @PathVariable Long id) {
-        Optional<Book> book = bookService.getBookById(id);
-        return book.map(ResponseEntity::ok).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ResponseEntity<Book> getBookById(@PathVariable String id) {
+        log.info("Request get book by id {}", id);
+        Book book = bookService.getBook(id);
+        return ObjectUtils.isEmpty(book) ? ResponseEntity.badRequest().build() : ResponseEntity.ok(book);
     }
 
-    @Operation(summary = "Actualizar un libro", responses = {
-            @ApiResponse(responseCode = "200", description = "Libro actualizado correctamente",
-                    content = @Content(schema = @Schema(implementation = Book.class)))
-    })
+
     @PutMapping("/{id}")
-    public ResponseEntity<Book> updateBook(@PathVariable Long id, @RequestBody Book bookDetails) {
+    public ResponseEntity<Book> updateBook(@PathVariable String id,@Valid @RequestBody BookDTO bookDetails) {
+        log.info("Request update book {}", bookDetails);
         Book updatedBook = bookService.updateBook(id, bookDetails);
-        return new ResponseEntity<>(updatedBook, HttpStatus.OK);
+        return ResponseEntity.ok(updatedBook);
     }
 
-    @Operation(summary = "Actualizar parcialmente un libro", responses = {
-            @ApiResponse(responseCode = "200", description = "Libro actualizado parcialmente",
-                    content = @Content(schema = @Schema(implementation = Book.class)))
-    })
     @PatchMapping("/{id}")
-    public ResponseEntity<Book> patchBook(@PathVariable Long id, @RequestBody Book bookDetails) {
+    public ResponseEntity<Book> patchBook(@PathVariable String id, @RequestBody Book bookDetails) {
+        log.info("Request patch book {}", bookDetails);
         Book updatedBook = bookService.patchBook(id, bookDetails);
-        return new ResponseEntity<>(updatedBook, HttpStatus.OK);
+        return ResponseEntity.ok(updatedBook);
     }
 
-    @Operation(summary = "Eliminar un libro", responses = {
-            @ApiResponse(responseCode = "204", description = "Libro eliminado correctamente"),
-            @ApiResponse(responseCode = "404", description = "Libro no encontrado")
-    })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
-        bookService.deleteBook(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    public ResponseEntity<Void> deleteBook(@PathVariable String id) {
+        log.info("Request delete book by id {}", id);
+        Boolean result = bookService.deleteBook(id);
+        return Boolean.TRUE.equals(result) ? ResponseEntity.notFound().build() : ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "Buscar libros con filtros", responses = {
-            @ApiResponse(responseCode = "200", description = "Libros encontrados",
-                    content = @Content(schema = @Schema(implementation = Book.class)))
-    })
+
     @GetMapping
-    public ResponseEntity<List<Book>> searchBooks(
+    public ResponseEntity<BooksQueryDTO> searchBooks(
             @RequestParam(required = false) String titulo,
             @RequestParam(required = false) String autor,
             @RequestParam(required = false) String categoria,
             @RequestParam(required = false) String isbn,
             @RequestParam(required = false) Integer valoracion,
-            @RequestParam(required = false) Boolean visible) {
+            @RequestParam(required = false, defaultValue = "false") Boolean aggregate) {
 
-        List<Book> books = bookService.searchBooks(titulo, autor, categoria, isbn, valoracion, visible);
-        return new ResponseEntity<>(books, HttpStatus.OK);
+        BooksQueryDTO books = bookService.getBooks(titulo, autor, categoria, isbn, valoracion, aggregate);
+        return ResponseEntity.ok(books);
     }
 }
